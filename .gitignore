@@ -1,0 +1,5 @@
+.pytest_cache/*
+/lib/.pytest_cache/*
+/lib/__pycache__/*
+/lib/ut/.pytest_cache/*
+/lib/ut/__pycache__/*
