@@ -8,9 +8,10 @@ def main():
     parser.add_argument("-u", "--host", default="::", help="server host")
     parser.add_argument("-p", "--port", type=int, default=80, help="server port")
     parser.add_argument("-d", "--debug", action="store_true", help="flask debug")
-    params, _ = parser.parse_known_args()
+    parser.add_argument("--config-path", required=True, help="recorder yaml config path")
+    params = parser.parse_args()
 
-    app = create_app("sync-recording")
+    app = create_app("sync-recording", params.config_path)
     app.run(host=params.host, port=params.port, debug=params.debug)
 
 

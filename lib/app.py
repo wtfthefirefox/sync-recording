@@ -4,6 +4,7 @@ from marshmallow.exceptions import ValidationError
 
 from .api import api, blueprint
 from .cache import cache
+from .config import config
 from .exceptions import (
     AuthenticationError,
     BadGatewayError,
@@ -14,11 +15,13 @@ from .exceptions import (
 from .download import *  # noqa
 
 
-def create_app(name):
+def create_app(name, config_path):
     app = Flask(name)
     app.register_blueprint(blueprint)
     app.config["PROPAGATE_EXCEPTIONS"] = False
     cache.init_app(app)
+
+    config.load_from(config_path)
 
     @api.errorhandler(RequestParamsError)
     def handle_request_params_error(error):
