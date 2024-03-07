@@ -1,9 +1,10 @@
+Flask==1.1.4
 Werkzeug==0.16.1
 argparse
 flask-restx
-Flask==1.1.4
 flask_caching
 jinja2==2.11.3
 markupsafe==2.0.1
 marshmallow
 pytest
+pyyaml

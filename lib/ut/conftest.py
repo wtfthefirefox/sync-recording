@@ -1,3 +1,4 @@
+import os
 import pytest
 import sys
 
@@ -6,7 +7,7 @@ from ..app import create_app
 
 @pytest.fixture
 def app():
-    app = create_app("tests")
+    app = create_app("tests", "settings.yaml")
 
     yield app
 
