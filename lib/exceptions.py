@@ -16,3 +16,6 @@ class CommandExecutionError(Exception):
 
 class BadGatewayError(Exception):
     pass
+
+class NotFoundError(Exception):
+    pass

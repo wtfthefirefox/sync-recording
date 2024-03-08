@@ -9,6 +9,7 @@ from .exceptions import (
     AuthenticationError,
     BadGatewayError,
     ForbiddenError,
+    NotFoundError,
     RequestParamsError,
 )
 
@@ -35,6 +36,10 @@ def create_app(name, config_path):
     @api.errorhandler(ForbiddenError)
     def handle_permissions_error(error):
         return {"message": str(error)}, 403
+    
+    @api.errorhandler(NotFoundError)
+    def handle_not_found_error(error):
+        return {"message": str(error)}, 404
 
     @api.errorhandler(BadGatewayError)
     def handle_bad_gateway_error(error):
