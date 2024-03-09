@@ -49,7 +49,7 @@ SAMPLE = (r'{"mode":"start","mid":"10998","name":"ReoLinkWireless","type":"h264"
           r'\"stream_channels\":\"\",\"input_maps\":\"\",\"input_map_choices\":\"\"}","shto":"[]","shfr":"[]"}')
 
 
-async def load_camera(api, **kwargs):
+async def load_camera(ip, api, group, **kwargs):
     data = json.loads(SAMPLE)
     details = json.loads(data['details'])
 
@@ -69,13 +69,13 @@ async def load_camera(api, **kwargs):
     data_string = data_string[:-1] + ", 'details': " + f"'{details_string}'"
     data_string = data_string.replace("'", '"') + '}'
 
-    url = ('http://51.250.23.237:8080/' + api + '/configureMonitor/1/') + data['mid'] + f"/?data=" + data_string
+    url = (ip + api + '/configureMonitor/' + f'{group}/') + data['mid'] + '/?data=' + data_string
     requests.post(url, verify=False)
     pass
 
 
 async def main():
-    await load_camera(api='your_api',
+    await load_camera(ip='http://your_ip:port/', api='your_api', group=1,
                       mid='monitor_id', name='monitor_name', host='ip_address', port='port',
                       auto_host='rtsp_address',
                       detector='1', detector_trigger='1', detector_buffer_hls_time='5',
