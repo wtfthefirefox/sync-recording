@@ -144,9 +144,16 @@ async def record(minutes_to_record, room_id):
 
 
 async def main():
-    await record(minutes_to_record=2, room_id="abc")
-    #join("506")
-    #change_audio("506", "506/2024-03-08T18-13-36.mp4")
+    room_id = "abc"
+    minutes_to_record = 2
+    folder = "folder"
+    main_audio_file = "folder/main.mp4"
+    
+
+    await record(minutes_to_record=minutes_to_record, room_id=room_id)
+    await asyncio.sleep(5)
+    join(folder)
+    change_audio(folder, main_audio_file)
 
 
 if __name__ == '__main__':
