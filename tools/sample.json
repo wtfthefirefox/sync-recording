@@ -1,0 +1,40 @@
+[
+    {
+        "room_name": "305",
+        "cameras": [
+            {
+                "mid": "305-1",
+                "host": "192.168.1.10",
+                "port": "8080",
+                "username": "admin",
+                "password": "Supervisor"
+            },
+            {
+                "mid": "305-2",
+                "host": "192.168.1.11",
+                "port": "8081",
+                "username": "admin",
+                "password": "Supervisor"
+            }
+        ]
+    },
+    {
+        "room_name": "306",
+        "cameras": [
+            {
+                "mid": "306-1",
+                "host": "192.168.1.12",
+                "port": "8082",
+                "username": "admin",
+                "password": "Supervisor"
+            },
+            {
+                "mid": "306-2",
+                "host": "192.168.1.13",
+                "port": "8083",
+                "username": "admin",
+                "password": "Supervisor"
+            }
+        ]
+    }
+]
