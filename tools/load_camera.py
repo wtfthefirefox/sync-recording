@@ -51,6 +51,14 @@ details = json.loads(data['details'])
 
 
 def load_camera(settings):
+    ip = ""
+    for index, char in enumerate(settings['ip']):
+        if char.isdigit() or char == "." or (char == ":" and settings['ip'][index + 1].isdigit()):
+            ip += char
+    if "https" in settings["ip"]:
+        settings["ip"] = f"https://{ip}"
+    else:
+        settings["ip"] = f"http://{ip}"
 
     for key, value in settings.items():
         if key in data and value is not None:
@@ -68,17 +76,22 @@ def load_camera(settings):
     data_string = f"{data_string[:-1]}, 'details': '{details_string}'"
     data_string = data_string.replace("'", '"') + "}"
 
-    url = f"{settings['ip']}/{settings['api']}/configureMonitor/{settings['group']}/{settings['mid']}/?data={data_string}"
-    requests.post(url, verify=False)
+    url = f"{settings['ip']}/{settings['api']}/configureMonitor/{settings['group_key']}/{settings['mid']}/?data={data_string}"
+
+    try:
+        requests.post(url, verify=False, timeout=60)
+    except Exception:
+        print("Проблемы с соединением к серверу или введены некорректные данные")
+
     pass
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Добавление камеры в Shinobi")
 
-    parser.add_argument("--ip", help="IP-адрес для доступа к Shinobi", default="0.0.0.0")
+    parser.add_argument("--ip", help="IP-адрес для доступа к Shinobi", default="http://0.0.0.0:8080")
     parser.add_argument("--api", help="API для доступа к Shinobi", default="0")
-    parser.add_argument("--group", help="Группа камер", default="1")
+    parser.add_argument("--group_key", help="Ваш ключ группы", default="1")
     parser.add_argument("--mid", help="ID камеры", default="10998")
     parser.add_argument("--name", help="Имя камеры", default="CameraName")
     parser.add_argument("--host", help="IP камеры", default="192.168.1.40")
