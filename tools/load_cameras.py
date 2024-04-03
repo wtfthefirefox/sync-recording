@@ -1,8 +1,9 @@
 import argparse
+import copy
 import json
 import requests
 
-data = json.loads((r'{"mode":"start","mid":"10998","name":"ReoLinkWireless","type":"h264","protocol":"rtsp",'
+data_ = json.loads((r'{"mode":"start","mid":"10998","name":"ReoLinkWireless","type":"h264","protocol":"rtsp",'
                    r'"host":"192.168.1.40","port":"554","path":"/","ext":"mp4","fps":"3","width":"2048","height":"1536",'
                    r'"details":"{\"notes\":\"\",\"dir\":\"\",\"auto_host_enable\":\"1\",'
                    r'\"auto_host\":\"rtsp://user:pass@192.168.1.40:554/\",\"rtsp_transport\":\"tcp\",\"muser\":\"user\",'
@@ -47,10 +48,45 @@ data = json.loads((r'{"mode":"start","mid":"10998","name":"ReoLinkWireless","typ
                    r'\"control_url_zoom_out_stop\":\"\",\"control_url_zoom_in\":\"\",\"control_url_zoom_in_stop\":\"\",'
                    r'\"groups\":\"\",\"loglevel\":\"quiet\",\"sqllog\":\"0\",\"detector_cascades\":\"\",'
                    r'\"stream_channels\":\"\",\"input_maps\":\"\",\"input_map_choices\":\"\"}","shto":"[]","shfr":"[]"}'))
-details = json.loads(data['details'])
+details_ = json.loads(data_['details'])
 
 
-def load_camera(settings):
+def load_camera(settings, path_to_json=None, path_to_new_json=None):
+    data = copy.copy(data_)
+    details = copy.copy(details_)
+    if path_to_json is not None:
+        with open(path_to_json, 'r') as file:
+            json_data = json.load(file)
+
+        flag = False
+        for room in json_data:
+            if room["room_name"] == settings["mid"][:3]:
+                flag = True
+                room["cameras"].append({
+                    "mid": settings["mid"],
+                    "host": settings["host"],
+                    "port": settings["port"],
+                    "auto_host": settings["auto_host"]
+                })
+
+        if not flag:
+            json_data.append({
+                "room_name": settings["mid"][:3],
+                "cameras": [{
+                    "mid": settings["mid"],
+                    "host": settings["host"],
+                    "port": settings["port"],
+                    "auto_host": settings["auto_host"]
+                }]
+            })
+
+        if path_to_new_json is not None:
+            with open(path_to_new_json, 'w') as f:
+                json.dump(json_data, f)
+        else:
+            with open(path_to_json, 'w') as f:
+                json.dump(json_data, f)
+
     ip = ""
     for index, char in enumerate(settings['ip']):
         if char.isdigit() or char == "." or (char == ":" and settings['ip'][index + 1].isdigit()):
@@ -79,11 +115,26 @@ def load_camera(settings):
     url = f"{settings['ip']}/{settings['api']}/configureMonitor/{settings['group_key']}/{settings['mid']}/?data={data_string}"
 
     try:
-        requests.post(url, verify=False, timeout=60)
+        response = requests.post(url, verify=False, timeout=60)
+        print(response.text)
     except Exception:
         print("Проблемы с соединением к серверу или введены некорректные данные")
 
     pass
+
+
+def load_cameras(settings):
+    with open(settings["input_json"], 'r') as file:
+        json_data = json.load(file)
+
+    for room in json_data:
+        for camera in room["cameras"]:
+            settings["mid"] = camera["mid"]
+            settings["name"] = camera["mid"]
+            settings["host"] = camera["host"]
+            settings["port"] = camera["port"]
+            settings["auto_host"] = camera["auto_host"]
+            load_camera(settings)
 
 
 if __name__ == '__main__':
@@ -105,6 +156,12 @@ if __name__ == '__main__':
     parser.add_argument("--detector_send_frames", choices=["0", "1"], help="Включить/выключить анализ кадров",
                         default="0")
     parser.add_argument("--detector_timeout", help="Время записи с тригерра", default="1")
+    parser.add_argument("--input_json", help="Путь до входного json'a с камерами", default=None)
+    parser.add_argument("--output_json", help="Путь до выходного json'a с камерами", default=None)
+    parser.add_argument("--from_json", type=bool, help="Загрузка камер из Json", default=False)
     args = parser.parse_args()
 
-    load_camera(vars(args))
+    if args.from_json:
+        load_cameras(vars(args))
+    else:
+        load_camera(vars(args), args.input_json, args.output_json)

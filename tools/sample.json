@@ -1,39 +1,46 @@
 [
     {
-        "room_name": "305",
+        "room_name": "905",
         "cameras": [
             {
-                "mid": "305-1",
+                "mid": "905-1",
                 "host": "192.168.1.10",
                 "port": "8080",
-                "username": "admin",
-                "password": "Supervisor"
+                "auto_host": "rtsp://192.168.1.10:8080/Streaming/Channels/1"
             },
             {
-                "mid": "305-2",
+                "mid": "905-2",
                 "host": "192.168.1.11",
                 "port": "8081",
-                "username": "admin",
-                "password": "Supervisor"
+                "auto_host": "rtsp://192.168.1.11:8081/Streaming/Channels/1"
             }
         ]
     },
     {
-        "room_name": "306",
+        "room_name": "906",
         "cameras": [
             {
-                "mid": "306-1",
+                "mid": "906-1",
                 "host": "192.168.1.12",
                 "port": "8082",
-                "username": "admin",
-                "password": "Supervisor"
+                "auto_host": "rtsp://192.168.1.12:8082/Streaming/Channels/1"
             },
             {
-                "mid": "306-2",
+                "mid": "906-2",
                 "host": "192.168.1.13",
                 "port": "8083",
-                "username": "admin",
-                "password": "Supervisor"
+                "auto_host": "rtsp://192.168.1.13:8083/Streaming/Channels/1"
+            }
+        ]
+    },
+    {
+        "room_name": "399",
+        "cameras": [
+            {
+                "mid": "399_2",
+                "host": "172.18.191.123",
+                "port": "8899",
+                "auto_host": "rtsp://172.18.191.123:554/Streaming/Channels/1"
             }
         ]
     }
