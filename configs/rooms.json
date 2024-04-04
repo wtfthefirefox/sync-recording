@@ -34,13 +34,13 @@
         ]
     },
     {
-        "room_name": "399",
+        "room_name": "907",
         "cameras": [
             {
-                "mid": "399_2",
-                "host": "172.18.191.123",
-                "port": "8899",
-                "auto_host": "rtsp://172.18.191.123:554/Streaming/Channels/1"
+                "mid": "907-2",
+                "host": "192.168.1.14",
+                "port": "8083",
+                "auto_host": "rtsp://192.168.1.14:8083/Streaming/Channels/1"
             }
         ]
     }

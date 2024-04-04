@@ -2,14 +2,20 @@ import argparse
 import json
 
 
-def get_monitor_ids(config: list, room_name: str) -> list:
-    cams = []
-    for room in config:
-        if room['room_name'] == room_name:
-            for camera in room['cameras']:
-                cams.append(camera['mid'])
+def get_monitors_by_room(input_json, output_file, room_name):
+    with open(args.input_json, 'r') as file:
+        config = json.load(file)
 
-    return cams
+    with open(args.output_file, 'w') as file:
+        cams = []
+        for room in config:
+            if room['room_name'] == room_name:
+                for camera in room['cameras']:
+                    cams.append(camera['mid'])
+
+        json.dump(cams, file)
+
+    print(cams)
 
 
 parser = argparse.ArgumentParser(description="Добавление камеры в Shinobi")
@@ -18,11 +24,4 @@ parser.add_argument("--output_file", help="Путь до выходного фа
 parser.add_argument("--room", help="Номер нужной комнаты")
 
 args = parser.parse_args()
-with open(args.input_json, 'r') as file:
-    data = json.load(file)
-
-with open(args.output_file, 'w') as file:
-    cameras = get_monitor_ids(data, args.room)
-    json.dump(cameras, file)
-
-print(cameras)
+get_monitors_by_room(args.input_json, args.output_file, args.room)
