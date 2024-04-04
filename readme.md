@@ -15,14 +15,18 @@ TBA
 # Как посмотреть логи?
 Логи доступны в файле `nohup.out`. Наиболее простой способ просмотра логов - это использование утилиты less - `less nohup.out`.
 
+# Как начать запись?
+Начать запись можно используя 'tools/start_recording.py' Ее настройки и параметры можно посмотреть написав так: `python start_recording.py -h`.
+
+# Как получить итоговые записи?
+Записи сохраняются поминутно. Чтобы их объединить, необходимо воспользоваться 'tools/join_videos.py' Ее настройки и параметры можно посмотреть написав так: `python join_videos.py -h`.
+
 # Как добавить новые камеры?
 Для этого есть тулза `tools/load_cameras.py`. Ее настройки и параметры можно посмотреть написав так: `python load_cameras.py -h`.
 
 # Running tests steps:
-1. Add cameras using load_camera.py
-2. Configure address, api_key, group_key and rooms variables in recording.py using values from your ShinobiCCTV server.
-3. Customize main() function. You can configure time recording, room and some video joining params.
-
+1. Ensure that Installation steps works fine
+2. Run `pytest` in `lib/ut` directory
 
 # How to start the server?
 0. If you want to get all availiable options, run `python main.py -h`
