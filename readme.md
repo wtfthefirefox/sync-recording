@@ -1,8 +1,11 @@
-# Как установить?:
+# Как установить?
 0. `git clone https://github.com/wtfthefirefox/sync-recording.git`
 1. `sudo su`
 2. `sh <(curl -s https://cdn.shinobi.video/installers/shinobi-install.sh)`
 3. `pip install -r requirements.txt`
+
+# Первоначальная настройка shinobi
+TBA
 
 # Как запускать после установки?
 0. Запускать нужно все в отедльных папках, что бы логи были у каждого из сервисов.
@@ -11,6 +14,9 @@
 
 # Как посмотреть логи?
 Логи доступны в файле `nohup.out`. Наиболее простой способ просмотра логов - это использование утилиты less - `less nohup.out`.
+
+# Как добавить новые камеры?
+Для этого есть тулза `tools/load_cameras.py`. Ее настройки и параметры можно посмотреть написав так: `python load_cameras.py -h`.
 
 # Running tests steps:
 1. Ensure that Installation steps works fine
