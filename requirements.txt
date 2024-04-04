@@ -5,7 +5,6 @@ argparse
 flask-restx
 flask_caching
 jinja2==2.11.3
-json
 markupsafe==2.0.1
 marshmallow
 pytest
