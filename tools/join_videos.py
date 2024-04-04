@@ -12,6 +12,7 @@ class Room:
         self.cameras_id = cameras_id
         self.room_id = room_id
 
+
 def change_audio(video_folder, audio_file):
     """
         Takes audio from specified video and pastes
@@ -119,7 +120,8 @@ async def main():
 
     args = parser.parse_args()
     join(args.folder, args.room, args.placeholder)
-    change_audio(args.room, args.audio_file)
+    if args.audio_file is not None:
+        change_audio(args.room, args.audio_file)
 
 
 if __name__ == '__main__':
