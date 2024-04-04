@@ -2,13 +2,18 @@ import requests
 import datetime
 import asyncio
 import os
+import cv2
 
-address = 'http://51.250.23.237:8080'
-trigger_url = address + '/7XNORkX7v3Sz9h3LldW39EYAYOZjX5/motion/1/%camera%?data={"plug":"Актовый зал","name":"Home-Assistant","reason":"TRY_TO_RECORD","confidence":100}'
+address = 'http://84.201.177.141:8080'
+api_key = "fYNVjZNfYuqmdt9DecSHeigZ7yPmX5"
+group_key = "iIK9Z11DJ1"
 
-monitor_url1 = address + '/7XNORkX7v3Sz9h3LldW39EYAYOZjX5/motion/1/krkvVjzAwf?data={"plug":"Актовый зал","name":"Home-Assistant","reason":"TRY_TO_RECORD","confidence":100}'
 
-camera_url = address + '/7XNORkX7v3Sz9h3LldW39EYAYOZjX5/monitor/1/krkvVjzAwf'
+trigger_url = address + '/'+api_key+'/motion/'+group_key+'/%camera%?data={"plug":"Актовый зал","name":"Home-Assistant","reason":"TRY_TO_RECORD","confidence":100}'
+
+monitor_url1 = address + '/'+api_key+'/motion/1/krkvVjzAwf?data={"plug":"Актовый зал","name":"Home-Assistant","reason":"TRY_TO_RECORD","confidence":100}'
+
+camera_url = address + '/'+api_key+'/monitor/1/krkvVjzAwf'
 
 
 class Room:
@@ -17,7 +22,7 @@ class Room:
         self.room_id = room_id
 
 
-rooms = [Room("abc", ["Ml2sBI1IQu"])]
+rooms = [Room("abc", ["305_3"])]
 
 
 def get_camera():
@@ -71,7 +76,7 @@ def change_audio(video_folder, audio_file):
             os.system(command)
 
 
-def join(folder):
+def join(folder, room_id, placeholder):
     """
         Join all videos in folder to one.
 
@@ -79,30 +84,73 @@ def join(folder):
         ----------
         folder : str
             Source folder path
+        roomd_id : int
+            ID of room
+        placeholder : str
+            Path to image for placeholder if video fragment is broken.
     """
-    # Получаем список всех видео файлов в папке
-    video_files = [f for f in os.listdir(folder) if f.endswith('.mp4')]
+    cameras_id = []
+    print("Start joining")
 
-    # Сортируем видео файлы по дате
-    video_files.sort()
+    for room in rooms:
+        if room.room_id == room_id:
+            cameras_id = room.cameras_id
+    for camera in cameras_id:
 
-    # Создаем файл, в который будем записывать список видео файлов
-    list_file_path = os.path.join(folder, 'list.txt')
+        # Получаем список всех видео файлов в папке
+        video_files = [f for f in os.listdir(folder + '/' + camera) if f.endswith('.mp4')]
 
-    with open(list_file_path, 'w') as list_file:
-        for video_file in video_files:
-            list_file.write(f"file '{os.path.join(video_file)}'\n")
+        # Сортируем видео файлы по дате
+        video_files.sort()
 
-    # Получаем абсолютный путь к файлу list.txt
-    abs_list_file_path = os.path.abspath(list_file_path)
+        # Проверяем, есть ли битые или пропущенные видео
+        for i in range(len(video_files)):
+            video_path = os.path.join(folder, camera, video_files[i])
+            if not os.path.exists(video_path):
+                video_files[i] = placeholder
+                print(f'Пропущенный файл: {video_path}')
+            elif get_video_duration(video_path) < 50:
+                video_files[i] = placeholder
+                print(f'Битый файл: {video_path}')
 
-    # Собираем команду для ffmpeg
-    command = f"/opt/homebrew/bin/ffmpeg -y -f concat -i {abs_list_file_path} -c copy {os.path.join(folder, 'output.mp4')}"
+        # Создаем файл, в который будем записывать список видео файлов
+        list_file_path = os.path.join(folder + '/' + camera, 'list.txt')
 
-    print(command)
+        with open(list_file_path, 'w') as list_file:
+            for video_file in video_files:
+                list_file.write(f"file '{os.path.join(video_file)}'\n")
 
-    # Выполняем команду
-    os.system(command)
+        # Получаем абсолютный путь к файлу list.txt
+        abs_list_file_path = os.path.abspath(list_file_path)
+
+        # Собираем команду для ffmpeg
+        command = f"/opt/homebrew/bin/ffmpeg -y -f concat -i {abs_list_file_path} -c copy {os.path.join(folder + '/' + camera, 'output.mp4')}"
+
+        print(command)
+
+        # Выполняем команду
+        os.system(command)
+
+
+def get_video_duration(video_path):
+    """
+    Gets the duration of a video file.
+
+    Args:
+        video_path (path): Path to the video file.
+    Returns:
+        (int): Duration of the video file in seconds.
+    """
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        return -1     # Error opening the video file
+    length = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    if fps == 0:
+        return -1     # Error getting the FPS
+    duration = length / fps
+    cap.release()
+    return duration
 
 
 
@@ -146,14 +194,13 @@ async def record(minutes_to_record, room_id):
 async def main():
     room_id = "abc"
     minutes_to_record = 2
-    folder = "folder"
-    main_audio_file = "folder/main.mp4"
-    
+    folder = "/home/Shinobi/videos"
+    main_audio_file = "/home/Shinobi/videos/test/main.mp4"
 
     await record(minutes_to_record=minutes_to_record, room_id=room_id)
     await asyncio.sleep(5)
-    join(folder)
-    change_audio(folder, main_audio_file)
+    join(folder, room_id, 'NO_VIDEO.jpg')
+    #change_audio(folder, main_audio_file)
 
 
 if __name__ == '__main__':
