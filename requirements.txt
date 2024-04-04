@@ -10,3 +10,6 @@ marshmallow
 pytest
 pyyaml
 requests
+datetime
+opencv-python
+
