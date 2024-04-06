@@ -110,7 +110,7 @@ def get_video_duration(video_path):
 
 async def main():
     parser = argparse.ArgumentParser(description="Объединение видеозаписей")
-    parser.add_argument("--placeholder", help="Путь к картинке 'Нет сигнала'", default="test.jpg")
+    parser.add_argument("--placeholder", help="Путь к картинке 'Нет сигнала'", default="NO_VIDEO.jpg")
 
     parser.add_argument("--folder", help="Главная папка, в которой хранятся папки с записями",
                         default="/home/Shinobi/videos")
