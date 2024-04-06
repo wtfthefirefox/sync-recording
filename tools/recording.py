@@ -1,12 +1,12 @@
-import requests
-import datetime
 import asyncio
-import os
 import cv2
+import datetime
+import os
+import requests
 
-address = 'http://84.201.177.141:8080'
-api_key = "fYNVjZNfYuqmdt9DecSHeigZ7yPmX5"
-group_key = "iIK9Z11DJ1"
+address = ""
+api_key = ""
+group_key = ""
 
 
 trigger_url = address + '/'+api_key+'/motion/'+group_key+'/%camera%?data={"plug":"Актовый зал","name":"Home-Assistant","reason":"TRY_TO_RECORD","confidence":100}'
