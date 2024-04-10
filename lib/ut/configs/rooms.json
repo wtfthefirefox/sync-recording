@@ -1,0 +1,47 @@
+[
+  {
+    "room_name": "905",
+    "cameras": [
+      {
+        "mid": "905-1",
+        "host": "192.168.1.10",
+        "port": "8080",
+        "auto_host": "rtsp://192.168.1.10:8080/Streaming/Channels/1"
+      },
+      {
+        "mid": "905-2",
+        "host": "192.168.1.11",
+        "port": "8081",
+        "auto_host": "rtsp://192.168.1.11:8081/Streaming/Channels/1"
+      }
+    ]
+  },
+  {
+    "room_name": "906",
+    "cameras": [
+      {
+        "mid": "906-1",
+        "host": "192.168.1.12",
+        "port": "8082",
+        "auto_host": "rtsp://192.168.1.12:8082/Streaming/Channels/1"
+      },
+      {
+        "mid": "906-2",
+        "host": "192.168.1.13",
+        "port": "8083",
+        "auto_host": "rtsp://192.168.1.13:8083/Streaming/Channels/1"
+      }
+    ]
+  },
+  {
+    "room_name": "907",
+    "cameras": [
+      {
+        "mid": "907-2",
+        "host": "192.168.1.14",
+        "port": "8083",
+        "auto_host": "rtsp://192.168.1.14:8083/Streaming/Channels/1"
+      }
+    ]
+  }
+]

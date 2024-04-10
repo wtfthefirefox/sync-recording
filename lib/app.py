@@ -14,6 +14,7 @@ from .exceptions import (
 )
 
 from .download import *  # noqa
+from .health_check import * # noqa
 
 
 def create_app(name, config_path):

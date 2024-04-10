@@ -1,2 +1,6 @@
+api_key: ""
 export_dir: "/home/Shinobi/videos/1/"
+group_key: ""
 is_test: false
+rooms_info_file: "configs/rooms.json"
+shinobi_url: ""
