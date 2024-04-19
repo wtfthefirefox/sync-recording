@@ -1,12 +1,8 @@
-from flask_restx import Resource
+import argparse
 import copy
-import logging
+import json
 import requests
-import traceback
 
-from .api import api
-from .config import config
-from .exceptions import NotFoundError
 data_ = json.loads((r'{"mode":"start","mid":"10998","name":"ReoLinkWireless","type":"h264","protocol":"rtsp",'
                    r'"host":"192.168.1.40","port":"554","path":"/","ext":"mp4","fps":"3","width":"2048","height":"1536",'
                    r'"details":"{\"notes\":\"\",\"dir\":\"\",\"auto_host_enable\":\"1\",'
@@ -53,73 +49,118 @@ data_ = json.loads((r'{"mode":"start","mid":"10998","name":"ReoLinkWireless","ty
                    r'\"groups\":\"\",\"loglevel\":\"quiet\",\"sqllog\":\"0\",\"detector_cascades\":\"\",'
                    r'\"stream_channels\":\"\",\"input_maps\":\"\",\"input_map_choices\":\"\"}","shto":"[]","shfr":"[]"}'))
 details_ = json.loads(data_['details'])
-cur_route = api.namespace("load_cameras", description="load cameras by room", path="/load_cameras/")
 
-@cur_route.route("/<string:room>")
-class LoadCamerasViaConfig(Resource):
-    """
-    Load cameras in shinobi
-    """
 
-    def _get_request_url(self, settings):
-        data = copy.copy(data_)
-        details = copy.copy(details_)
+def load_camera(settings, path_to_json=None, path_to_new_json=None):
+    data = copy.copy(data_)
+    details = copy.copy(details_)
 
-        if not settings["name"]:
-            settings["name"] = settings["mid"]
+    if not settings["name"]:
+        settings["name"] = settings["mid"]
 
-        ip = ""
-        for index, char in enumerate(settings['ip']):
-            if char.isdigit() or char == "." or (char == ":" and settings['ip'][index + 1].isdigit()):
-                ip += char
-        if "https" in settings["ip"]:
-            settings["ip"] = f"https://{ip}"
+    if path_to_json is not None:
+        with open(path_to_json, 'r') as file:
+            json_data = json.load(file)
+
+        flag = False
+        for room in json_data:
+            if room["room_name"] == settings["mid"][:3]:
+                flag = True
+                room["cameras"].append({
+                    "mid": settings["mid"],
+                    "host": settings["host"],
+                    "port": settings["port"],
+                    "auto_host": settings["auto_host"]
+                })
+
+        if not flag:
+            json_data.append({
+                "room_name": settings["mid"][:3],
+                "cameras": [{
+                    "mid": settings["mid"],
+                    "host": settings["host"],
+                    "port": settings["port"],
+                    "auto_host": settings["auto_host"]
+                }]
+            })
+
+        if path_to_new_json is not None:
+            with open(path_to_new_json, 'w') as f:
+                json.dump(json_data, f)
         else:
-            settings["ip"] = f"http://{ip}"
+            with open(path_to_json, 'w') as f:
+                json.dump(json_data, f)
 
-        for key, value in settings.items():
-            if key in data and value is not None:
-                data[key] = value
-            if key in details and value is not None:
-                details[key] = value
+    ip = ""
+    for index, char in enumerate(settings['ip']):
+        if char.isdigit() or char == "." or (char == ":" and settings['ip'][index + 1].isdigit()):
+            ip += char
+    if "https" in settings["ip"]:
+        settings["ip"] = f"https://{ip}"
+    else:
+        settings["ip"] = f"http://{ip}"
 
-        details_string = str(details)
-        details_string = details_string.replace("'", r'\"')
-        details_string = details_string.replace(" ", "")
-        details_string = details_string.replace("None", "null")
-        del data['details']
+    for key, value in settings.items():
+        if key in data and value is not None:
+            data[key] = value
+        if key in details and value is not None:
+            details[key] = value
 
-        data_string = str(data)
-        data_string = f"{data_string[:-1]}, 'details': '{details_string}'"
-        data_string = data_string.replace("'", '"') + "}"
+    details_string = str(details)
+    details_string = details_string.replace("'", r'\"')
+    details_string = details_string.replace(" ", "")
+    details_string = details_string.replace("None", "null")
+    del data['details']
 
-        url_1 = f"{settings['ip']}/{settings['api']}/configureMonitor/{settings['group_key']}/{settings['mid']}/?data={data_string}"
+    data_string = str(data)
+    data_string = f"{data_string[:-1]}, 'details': '{details_string}'"
+    data_string = data_string.replace("'", '"') + "}"
 
-        settings["mid"] = settings["mid"] + "_"
-        url_2 = f"{settings['ip']}/{settings['api']}/configureMonitor/{settings['group_key']}/{settings['mid']}/?data={data_string}"
+    url_1 = f"{settings['ip']}/{settings['api']}/configureMonitor/{settings['group_key']}/{settings['mid']}/?data={data_string}"
 
-        return (url_1, url_2)
+    settings['mid'] = settings['mid'] + "_"
+    url_2 = f"{settings['ip']}/{settings['api']}/configureMonitor/{settings['group_key']}/{settings['mid']}/?data={data_string}"
+    try:
+        response_1 = requests.post(url_1, verify=False, timeout=60)
+        response_2 = requests.post(url_2, verify=False, timeout=60)
+        print(response_1.text)
+        print(response_2.text)
+    except Exception:
+        print("Проблемы с соединением к серверу или введены некорректные данные")
+    pass
 
-    def _load_cameras(self, room):
-        if room in config._data["rooms"].camerasByRoom:
-            for camera in config._data["rooms"].camerasByRoom[room]:
-                settings = {
-                    "ip": config._data["shinobi_url"],
-                            "api": config._data["api_key"],
-                            "group_key": config._data["group_key"],
-                            "mid": camera["mid"],
-                            "auto_host": camera["auto_host"]
-                }
-                try:
-                    request_url_1, request_url_2 = self._get_request_url(settings)
-                    response_1 = requests.post(request_url_1, verify=False, timeout=60)
-                    response_2 = requests.post(request_url_2, verify=False, timeout=60)
-                    return True
-                except Exception as e:
-                    logging.error(traceback.format_exc())
-                    return False
-        else:
-            raise NotFoundError(f"room {room} not presented in config")
 
-    def post(self, room):
-        return {"ok": self._load_cameras(room)}
+def load_cameras(settings):
+    with open(settings["input_json"], 'r') as file:
+        json_data = json.load(file)
+
+    for room in json_data:
+        for camera in room["cameras"]:
+            settings["mid"] = camera["mid"]
+            settings["name"] = camera["mid"]
+            settings["host"] = camera["host"]
+            settings["port"] = camera["port"]
+            settings["auto_host"] = camera["auto_host"]
+            load_camera(settings)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Добавление камеры в Shinobi")
+
+    parser.add_argument("--ip", help="IP-адрес для доступа к Shinobi", default="http://0.0.0.0:8080")
+    parser.add_argument("--api", help="API для доступа к Shinobi", default="0")
+    parser.add_argument("--group_key", help="Ваш ключ группы", default="1")
+    parser.add_argument("--mid", help="ID камеры", default="10998")
+    parser.add_argument("--name", help="Имя камеры")
+    parser.add_argument("--host", help="IP камеры")
+    parser.add_argument("--port", help="Port камеры")
+    parser.add_argument("--auto_host", help="RTSP-адрес камеры")
+    parser.add_argument("--input_json", help="Путь до входного json'a с камерами", default=None)
+    parser.add_argument("--output_json", help="Путь до выходного json'a с камерами", default=None)
+    parser.add_argument("--from_json", type=bool, help="Загрузка камер из Json", default=False)
+    args = parser.parse_args()
+
+    if args.from_json:
+        load_cameras(vars(args))
+    else:
+        load_camera(vars(args), args.input_json, args.output_json)
