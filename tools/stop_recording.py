@@ -89,11 +89,42 @@ def get_videos(ip, api, group_key, cameras):
             print(f'Error stopping recording: {e}')
     return camera_video
 
+import subprocess
+
 def merge_videos(room, videos_list, folder):
+    # Предполагается, что 'folder' - это путь к директории, где будут сохраняться временные и итоговые файлы.
     for camera in room.cameras_id:
-        videos1 = videos_list[camera]
-        videos2 = videos_list[camera + "_"]
-        #TODO: merging
+        videos1 = sorted(videos_list[camera], key=lambda x: datetime.datetime.strptime(x.start_time, '%Y-%m-%dT%H:%M:%SZ'))
+        videos2 = sorted(videos_list[camera + "_"], key=lambda x: datetime.datetime.strptime(x.start_time, '%Y-%m-%dT%H:%M:%SZ'))
+        # Создаем файл списка для ffmpeg
+        list_filename = f"{folder}/merge_list.txt"
+        with open(list_filename, 'w') as list_file:
+            # Добавляем первые 45 секунд из первого видео
+            list_file.write(f"file '{camera}/{videos1[0].filename}'\n")
+            list_file.write(f"inpoint 0\n")
+            list_file.write(f"outpoint 45\n")
+            # Для всех последующих видео берем 30 секундные сегменты, начиная с 15-й секунды
+            for v1, v2 in zip(videos1[1:], videos2):
+                list_file.write(f"file '{camera}_/{v2.filename}'\n")
+                list_file.write(f"inpoint 15\n")  # Начало с 15-й секунды
+                list_file.write(f"outpoint 45\n")  # Конец на 45-й секунде
+                list_file.write(f"file '{camera}/{v1.filename}'\n")
+                list_file.write(f"inpoint 15\n")  # То же для второго списка видео
+                if v1 != videos1[-1]:
+                    list_file.write(f"outpoint 45\n")
+        # Команда для склейки видео с использованием ffmpeg
+        merge_command = [
+            '/opt/homebrew/bin/ffmpeg',
+            '-f', 'concat',
+            '-safe', '0',
+            '-i', list_filename,
+            '-c', 'copy',
+            f"{folder}/merged.mp4"
+        ]
+        # Выполнение команды склейки
+        subprocess.run(merge_command)
+        # Удаление временного файла списка
+        #os.remove(list_filename)
 
 
 async def stop(ip, api, group_key, room, folder):
@@ -111,7 +142,7 @@ async def main():
     parser.add_argument("--api", help="API для доступа к Shinobi", default="fYNVjZNfYuqmdt9DecSHeigZ7yPmX5")
     parser.add_argument("--group_key", help="Ваш ключ группы", default="iIK9Z11DJ1")
     parser.add_argument("--room", help="Комната в Json", default='{"abc": ["304_3"]}')
-    parser.add_argument("--folder", help="Путь к папке videos", default="/home/Shinobi/videos")
+    parser.add_argument("--folder", help="Путь к папке videos", default="videos")
 
     args = parser.parse_args()
     room_json = json.loads(args.room)
