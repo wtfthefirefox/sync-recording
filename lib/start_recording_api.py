@@ -6,14 +6,9 @@ import asyncio
 import json
 
 from test.config import config
+from .api import api
 
-api = Namespace('record', description='Start recording of camera / room')
-
-record_model = api.model('Record', {
-    'room_id': fields.String(required=True, description='Room ID'),
-    'cameras_id': fields.List(fields.String, description='List of Camera IDs')
-})
-
+cur_route = api.namespace('record', description='Start recording of camera / room')
 
 class Room:
     def __init__(self, room_id, cameras_id):
@@ -100,23 +95,12 @@ async def record(room):
         await asyncio.sleep(diff_secs)
 
 
-@api.route('/')
+@cur_route.route('/')
 class RecordStarter(Resource):
-    @api.expect(record_model)
     def post(self):
         data = request.json
         room = Room(data['room_id'], data['cameras_id'])
         asyncio.run(record(room))
         return {'message': 'Recording started'}, 200
 
-record_namespace = api
 
-if __name__ == '__main__':
-    from flask import Flask
-    from flask_restx import Api
-
-    app = Flask(__name__)
-    api = Api(app)
-    api.add_namespace(record_namespace)
-
-    app.run(debug=True)
