@@ -5,10 +5,10 @@ import datetime
 import asyncio
 import json
 
-from test.config import config
+from .config import config
 from .api import api
 
-cur_route = api.namespace('record', description='Start recording of camera / room')
+cur_route = api.namespace('record_start', description='Start recording of camera / room')
 
 class Room:
     def __init__(self, room_id, cameras_id):
