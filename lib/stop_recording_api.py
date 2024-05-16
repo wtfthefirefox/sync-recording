@@ -5,7 +5,7 @@ import datetime
 import asyncio
 import json
 
-from test.config import config
+from .config import config
 from .api import api
 
 cur_route = api.namespace('record_stop', description='Start recording of camera / room')
