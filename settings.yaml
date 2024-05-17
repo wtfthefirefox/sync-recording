@@ -4,3 +4,4 @@ group_key: ""
 is_test: false
 rooms_info_file: "configs/rooms.json"
 shinobi_url: ""
+videos_dir: "/home/Shinobi/videos"
