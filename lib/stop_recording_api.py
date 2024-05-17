@@ -1,3 +1,5 @@
+import os
+
 from flask_restx import Resource, Namespace, fields
 from flask import request
 import requests
@@ -7,8 +9,9 @@ import json
 
 from .config import config
 from .api import api
+from .exceptions import NotFoundError
 
-cur_route = api.namespace('record_stop', description='Start recording of camera / room')
+cur_route = api.namespace('record_stop', description='Stop recording of room', path="/record_stop/")
 
 class Room:
     def __init__(self, room_id, cameras_id):
@@ -128,12 +131,12 @@ def merge_videos(room, videos_list, folder):
         # Выполнение команды склейки
         subprocess.run(merge_command)
         # Удаление временного файла списка
-        #os.remove(list_filename)
+        os.remove(list_filename)
 
 
 async def stop(room, folder):
-    ip = config._data["ip"]
-    api_path = config._data["api"]
+    ip = config._data["shinobi_url"]
+    api_path = config._data["api_key"]
     group_key = config._data["group_key"]
     room_id = room.room_id
     print("Stop recording")
@@ -147,11 +150,15 @@ async def stop(room, folder):
 class RecordStarter(Resource):
 
     def post(self):
-        data = request.json
-        room_json = json.loads(data["room"])
-        room_id = list(room_json.keys())[0]
-        cameras_id = room_json[room_id]
-        room = Room(room_id, cameras_id)
-        asyncio.run(stop(room, data["folder"]))
+        room_id = request.get_data().decode('utf-8')
+        cameras = []
+        if room_id in config._data["rooms"].camerasByRoom:
+            for camera in config._data["rooms"].camerasByRoom[room_id]:
+                cameras.append(camera["mid"])
+        else:
+            raise NotFoundError(f"room with id {room_id} not presented in config")
+        room = Room(room_id, cameras)
+
+        asyncio.run(stop(room, config._data["videos_dir"]))
         return {'message': 'Recording started'}, 200
 

@@ -7,8 +7,9 @@ import json
 
 from .config import config
 from .api import api
+from .exceptions import NotFoundError
 
-cur_route = api.namespace('record_start', description='Start recording of camera / room')
+cur_route = api.namespace('record_start', description='Start recording of room', path="/record_start/")
 
 class Room:
     def __init__(self, room_id, cameras_id):
@@ -17,8 +18,8 @@ class Room:
 
 
 def record_request(cameras):
-    ip = config._data["ip"]
-    api_path = config._data["api"]
+    ip = config._data["shinobi_url"]
+    api_path = config._data["api_key"]
     group_key = config._data["group_key"]
     time = "1/min"  # Это значение можно вынести в конфигурацию, если оно изменяется
     for camera in cameras:
@@ -98,8 +99,18 @@ async def record(room):
 @cur_route.route('/')
 class RecordStarter(Resource):
     def post(self):
-        data = request.json
-        room = Room(data['room_id'], data['cameras_id'])
+        room_id = request.get_data().decode('utf-8')
+        cameras = []
+        if room_id in config._data["rooms"].camerasByRoom:
+            for camera in config._data["rooms"].camerasByRoom[room_id]:
+                cameras.append(camera["mid"])
+        else:
+            raise NotFoundError(f"room with id {room_id} not presented in config")
+
+
+
+        print(cameras)
+        room = Room(room_id, cameras)
         asyncio.run(record(room))
         return {'message': 'Recording started'}, 200
 
