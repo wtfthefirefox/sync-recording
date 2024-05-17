@@ -15,6 +15,8 @@ from .exceptions import (
 
 from .download import *  # noqa
 from .health_check import * # noqa
+from .start_recording_api import * # noqa
+from .stop_recording_api import *
 
 
 def create_app(name, config_path):
