@@ -27,7 +27,7 @@ class CameraHealthChecker(Resource):
 
     def _check_camera_health(self, camera_id):
         try:
-            request_url_base_path = f"{config._data["shinobi_url"]}/{config._data["api_key"]}/probe/{config._data["group_key"]}?flag=default&url="
+            request_url_base_path = f"{config._data['shinobi_url']}/{config._data['api_key']}/probe/{config._data['group_key']}?flag=default&url="
             for camera_url in self._get_cameras_url(camera_id):
                 request_url = request_url_base_path + camera_url
                 camera_health = requests.get(request_url, timeout=5)
