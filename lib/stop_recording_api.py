@@ -1,6 +1,6 @@
 import os
 
-from flask_restx import Resource, Namespace, fields
+from flask_restx import Resource
 from flask import request
 import requests
 import datetime
@@ -40,6 +40,7 @@ def save_room_state(room_id, state):
         with open('room_states.json', 'w') as file:
             json.dump(room_states, file)
             file.close()
+            print("State saved")
     except OSError as e:
         print(e)
         print("Error while creating database file! Check permissions for this folder.")
@@ -120,13 +121,14 @@ def merge_videos(room, videos_list, folder):
                 if v1 != videos1[-1]:
                     list_file.write(f"outpoint 45\n")
         # Команда для склейки видео с использованием ffmpeg
+        date_str = datetime.datetime.utcnow().strftime('%Y-%m-%d_%H:%M:%S')
         merge_command = [
             '/opt/homebrew/bin/ffmpeg',
             '-f', 'concat',
             '-safe', '0',
             '-i', list_filename,
             '-c', 'copy',
-            f"{folder}/merged.mp4"
+            f"{folder}/{room.room_id}_merged_{date_str}.mp4"
         ]
         # Выполнение команды склейки
         subprocess.run(merge_command)
