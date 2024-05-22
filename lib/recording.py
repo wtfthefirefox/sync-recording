@@ -1,5 +1,4 @@
 from flask_restx import Resource
-from flask import request
 import asyncio
 import datetime
 import json
@@ -9,8 +8,7 @@ import subprocess
 
 from .config import config
 from .api import api
-from .exceptions import NotFoundError, RequestParamsError
-from .models import RecordVideo
+from .exceptions import NotFoundError
 
 RECORDING_TIME = "1/min"
 RECORDS_DIFF = 33 # time dif between records
