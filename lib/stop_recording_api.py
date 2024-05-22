@@ -152,7 +152,8 @@ async def stop(room, folder):
 class RecordStarter(Resource):
 
     def post(self):
-        room_id = request.get_data().decode('utf-8')
+        request_data = request.get_data().decode('utf-8')
+        room_id = request_data["room_id"]
         cameras = []
         if room_id in config._data["rooms"].camerasByRoom:
             for camera in config._data["rooms"].camerasByRoom[room_id]:
