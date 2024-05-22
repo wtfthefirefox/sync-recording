@@ -95,11 +95,11 @@ async def record(room):
 
         await asyncio.sleep(diff_secs)
 
-
 @cur_route.route('/')
 class RecordStarter(Resource):
     def post(self):
-        room_id = request.get_data().decode('utf-8')
+        request_data = request.get_data().decode('utf-8')
+        room_id = request_data["room_id"]
         cameras = []
         if room_id in config._data["rooms"].camerasByRoom:
             for camera in config._data["rooms"].camerasByRoom[room_id]:
@@ -107,11 +107,7 @@ class RecordStarter(Resource):
         else:
             raise NotFoundError(f"room with id {room_id} not presented in config")
 
-
-
         print(cameras)
         room = Room(room_id, cameras)
         asyncio.run(record(room))
         return {'message': 'Recording started'}, 200
-
-
