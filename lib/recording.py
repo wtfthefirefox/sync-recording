@@ -10,7 +10,6 @@ import subprocess
 from .config import config
 from .api import api
 from .exceptions import NotFoundError
-from .models import RecordVideo
 
 RECORDING_TIME = "1/min"
 RECORDS_DIFF = 33 # time dif between records
@@ -98,35 +97,9 @@ async def record(room):
 
 @cur_route.route("/start")
 class RecordStart(Resource):
-    """
-   ---
-   post:
-     summary: Возводит число в степень
-     parameters:
-       - in: query
-         schema: InputSchema
-     responses:
-       '200':
-         description: Результат возведения в степень
-         content:
-           application/json:
-             schema: OutputSchema
-       '400':
-         description: Не передан обязательный параметр
-         content:
-           application/json:
-             schema: ErrorSchema
-     tags:
-       - math
-   """
     def post(self):
-        data = request.get_json()
-        if data is None:
-            return {"error": "pass room_id in json payload"}, 400
-
-        schema = RecordVideo()
-        unmarshal_result = schema.load(data)
-        room_id = unmarshal_result["room_id"]
+        request_data = request.get_data().decode('utf-8')
+        room_id = request_data["room_id"]
         cameras = []
         if room_id in config._data["rooms"].camerasByRoom:
             for camera in config._data["rooms"].camerasByRoom[room_id]:
@@ -270,13 +243,8 @@ async def stop(room, folder):
 @cur_route.route("/stop")
 class RecordStop(Resource):
     def post(self):
-        data = request.get_json()
-        if data is None:
-            return {"error": "pass room_id in json payload"}, 400
-
-        schema = RecordVideo()
-        unmarshal_result = schema.load(data)
-        room_id = unmarshal_result["room_id"]
+        request_data = request.get_data().decode('utf-8')
+        room_id = request_data["room_id"]
         cameras = []
         if room_id in config._data["rooms"].camerasByRoom:
             for camera in config._data["rooms"].camerasByRoom[room_id]:
