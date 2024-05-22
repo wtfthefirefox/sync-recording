@@ -162,6 +162,6 @@ class RecordStarter(Resource):
             raise NotFoundError(f"room with id {room_id} not presented in config")
         room = Room(room_id, cameras)
 
-        asyncio.run(stop(room, config._data["videos_dir"]))
+        asyncio.run(stop(room, config._data["export_dir"]))
         return {'message': 'Recording started'}, 200
 
