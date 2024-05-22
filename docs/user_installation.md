@@ -74,6 +74,6 @@ python join_videos.py --placeholder PLACEHORLDER_PATH --folder SHINOBI_PATH --au
 
 ## API
 1. GET /api/v1/health_check/{camera_id} - проверяем жива ли камера / комната, где camera_id это id камеры или комнаты.
-2. POST /api/v1/record/start + тело запроса: {"room_id": room_id} - ручка для старта записи и ее нельзя отпускать пока не завершена запись, где room_id это id комнаты.
-3. POST /api/v1/record/stop + тело запроса: {"room_id": room_id} - ручка для окончания записи, где room_id это id комнаты результат записи будет лежать в export_dir переменной указанной в [конфиге](../settings.yaml).
+2. POST /api/v1/record/{room_id}/start - ручка для старта записи и ее нельзя отпускать пока не завершена запись, где room_id это id комнаты.
+3. POST /api/v1/record/{room_id}/stop - ручка для окончания записи, где room_id это id комнаты результат записи будет лежать в export_dir переменной указанной в [конфиге](../settings.yaml).
 4. GET api/v1/download/file/{file_name} - ручка для получения скачивания сделанных записей, где file_name - имя файла для скачивания

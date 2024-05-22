@@ -9,7 +9,8 @@ import subprocess
 
 from .config import config
 from .api import api
-from .exceptions import NotFoundError
+from .exceptions import NotFoundError, RequestParamsError
+from .models import RecordVideo
 
 RECORDING_TIME = "1/min"
 RECORDS_DIFF = 33 # time dif between records
@@ -95,11 +96,9 @@ async def record(room):
         await asyncio.sleep(RECORDS_DIFF)
 
 
-@cur_route.route("/start")
+@cur_route.route("/<string:room_id>/start/")
 class RecordStart(Resource):
-    def post(self):
-        request_data = request.get_data().decode('utf-8')
-        room_id = request_data["room_id"]
+    def post(self, room_id):
         cameras = []
         if room_id in config._data["rooms"].camerasByRoom:
             for camera in config._data["rooms"].camerasByRoom[room_id]:
@@ -240,11 +239,9 @@ async def stop(room, folder):
     merge_videos(room, videos_list, folder)
 
 
-@cur_route.route("/stop")
+@cur_route.route("/<string:room_id>/stop/")
 class RecordStop(Resource):
-    def post(self):
-        request_data = request.get_data().decode('utf-8')
-        room_id = request_data["room_id"]
+    def post(self, room_id):
         cameras = []
         if room_id in config._data["rooms"].camerasByRoom:
             for camera in config._data["rooms"].camerasByRoom[room_id]:
