@@ -19,6 +19,24 @@ class Room:
     def __init__(self, room_id, cameras_id):
         self.cameras_id = cameras_id
         self.room_id = room_id
+       
+ def save_room_state(room_id, state):
+    try:
+        with open("room_states.json", "r") as file:
+            room_states = json.load(file)
+    except FileNotFoundError:
+        room_states = {}
+
+    room_states[room_id] = state
+
+    try:
+        with open("room_states.json", "w") as file:
+            json.dump(room_states, file)
+            file.close()
+            print("State saved")
+    except OSError as e:
+        print(e)
+        print("Error while creating database file! Check permissions for this folder.")
 
 def save_room_state(room_id, state):
     try:
