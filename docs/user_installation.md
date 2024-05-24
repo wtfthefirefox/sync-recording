@@ -73,4 +73,7 @@ python join_videos.py --placeholder PLACEHORLDER_PATH --folder SHINOBI_PATH --au
 Сама shinobi будет доступна на `http://your_ip:8080`, а апи доступна соотвественно на `http://your_ip:8081`.
 
 ## API
-На данный момент доступна одна ручка `/download/file/{fileName}?dir_path={yourDirPath}`, где `fileName` это имя файла, который хотелось бы загрузить и `yourDirPath` это путь до папки в которой лежит файл и также это необязательный параметр.
+1. GET /api/v1/health_check/{camera_id} - проверяем жива ли камера / комната, где camera_id это id камеры или комнаты.
+2. POST /api/v1/record/{room_id}/start - ручка для старта записи и ее нельзя отпускать пока не завершена запись, где room_id это id комнаты.
+3. POST /api/v1/record/{room_id}/stop - ручка для окончания записи, где room_id это id комнаты результат записи будет лежать в export_dir переменной указанной в [конфиге](../settings.yaml).
+4. GET api/v1/download/file/{file_name} - ручка для получения скачивания сделанных записей, где file_name - имя файла для скачивания
