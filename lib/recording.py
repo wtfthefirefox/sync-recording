@@ -11,32 +11,16 @@ from .api import api
 from .exceptions import NotFoundError
 
 RECORDING_TIME = "1/min"
-RECORDS_DIFF = 33 # time dif between records
+RECORDS_DIFF = 33  # time dif between records
 
 cur_route = api.namespace("record", description="Recording API", path="/record/")
+
 
 class Room:
     def __init__(self, room_id, cameras_id):
         self.cameras_id = cameras_id
         self.room_id = room_id
 
-def save_room_state(room_id, state):
-    try:
-        with open("room_states.json", "r") as file:
-            room_states = json.load(file)
-    except FileNotFoundError:
-        room_states = {}
-
-    room_states[room_id] = state
-
-    try:
-        with open("room_states.json", "w") as file:
-            json.dump(room_states, file)
-            file.close()
-            print("State saved")
-    except OSError as e:
-        print(e)
-        print("Error while creating database file! Check permissions for this folder.")
 
 def save_room_state(room_id, state):
     try:
@@ -74,6 +58,7 @@ def record_request(cameras):
                 print("GET request failed with error:", response.status_code)
         except Exception as e:
             print(f"Error starting recording: {e}")
+
 
 async def record(room):
     cameras_id = room.cameras_id
@@ -135,7 +120,6 @@ class Video:
         self.end_time = end_time
 
 
-
 def stop_request(ip, api, group_key, cameras):
     new_cameras = []
     for c in cameras:
@@ -191,8 +175,10 @@ def get_videos(ip, api, group_key, cameras):
 def merge_videos(room, videos_list, folder):
     # Предполагается, что "folder" - это путь к директории, где будут сохраняться временные и итоговые файлы.
     for camera in room.cameras_id:
-        videos1 = sorted(videos_list[camera], key=lambda x: datetime.datetime.strptime(x.start_time, "%Y-%m-%dT%H:%M:%SZ"))
-        videos2 = sorted(videos_list[camera + "_"], key=lambda x: datetime.datetime.strptime(x.start_time, "%Y-%m-%dT%H:%M:%SZ"))
+        videos1 = sorted(videos_list[camera],
+                         key=lambda x: datetime.datetime.strptime(x.start_time, "%Y-%m-%dT%H:%M:%SZ"))
+        videos2 = sorted(videos_list[camera + "_"],
+                         key=lambda x: datetime.datetime.strptime(x.start_time, "%Y-%m-%dT%H:%M:%SZ"))
         # Создаем файл списка для ffmpeg
         list_filename = f"{folder}/merge_list.txt"
         with open(list_filename, "w") as list_file:
