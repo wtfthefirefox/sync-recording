@@ -19,6 +19,24 @@ class Room:
     def __init__(self, room_id, cameras_id):
         self.cameras_id = cameras_id
         self.room_id = room_id
+       
+ def save_room_state(room_id, state):
+    try:
+        with open("room_states.json", "r") as file:
+            room_states = json.load(file)
+    except FileNotFoundError:
+        room_states = {}
+
+    room_states[room_id] = state
+
+    try:
+        with open("room_states.json", "w") as file:
+            json.dump(room_states, file)
+            file.close()
+            print("State saved")
+    except OSError as e:
+        print(e)
+        print("Error while creating database file! Check permissions for this folder.")
 
 
 def record_request(cameras):
@@ -39,24 +57,6 @@ def record_request(cameras):
         except Exception as e:
             print(f"Error starting recording: {e}")
 
-
-def save_room_state(room_id, state):
-    try:
-        with open("../room_states.json", "r") as file:
-            room_states = json.load(file)
-    except FileNotFoundError:
-        room_states = {}
-
-    room_states[room_id] = state
-
-    try:
-        with open("../room_states.json", "w") as file:
-            json.dump(room_states, file)
-            file.close()
-    except OSError as e:
-        print("Error while creating database file! Check permissions for this folder.", e)
-
-
 async def record(room):
     cameras_id = room.cameras_id
     room_id = room.room_id
@@ -65,7 +65,7 @@ async def record(room):
     for camera in cameras_id:
         new_cameras_id.append(camera + "_")
     try:
-        with open("../room_states.json", "r") as file:
+        with open("room_states.json", "r") as file:
             for line in file:
                 room_states = json.loads(line)
                 if room_id in room_states and room_states[room_id] == "recording":
@@ -80,7 +80,7 @@ async def record(room):
 
         await asyncio.sleep(RECORDS_DIFF)
 
-        with open("../room_states.json", "r") as file:
+        with open("room_states.json", "r") as file:
             for line in file:
                 room_states = json.loads(line)
                 if room_id in room_states and room_states[room_id] == "stop":
@@ -116,24 +116,6 @@ class Video:
         self.start_time = start_time
         self.end_time = end_time
 
-
-def save_room_state(room_id, state):
-    try:
-        with open("room_states.json", "r") as file:
-            room_states = json.load(file)
-    except FileNotFoundError:
-        room_states = {}
-
-    room_states[room_id] = state
-
-    try:
-        with open("room_states.json", "w") as file:
-            json.dump(room_states, file)
-            file.close()
-            print("State saved")
-    except OSError as e:
-        print(e)
-        print("Error while creating database file! Check permissions for this folder.")
 
 
 def stop_request(ip, api, group_key, cameras):
