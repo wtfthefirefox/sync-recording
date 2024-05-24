@@ -19,7 +19,7 @@ class Room:
     def __init__(self, room_id, cameras_id):
         self.cameras_id = cameras_id
         self.room_id = room_id
-       
+
 def save_room_state(room_id, state):
     try:
         with open("room_states.json", "r") as file:
